@@ -65,23 +65,19 @@ module step1(max_length=10, height=1, mtx, n=5, counter)
         angle = gen_angle();
         mtxr = [ for (i = [ 0 : 2 ]) [ for (j = [ 0 : 3 ]) mtx[i][j] ] ];
         bar_vtx = bar_vertices(length,height,mtxr);
-        must_jump = (len([for (i = [0, len(counter)-2]) if (intersect_bars(counter[i], bar_vtx)) 1]) > 0);
-        //color("red", 1)
-        //    if (n>1) polyhedron(bar_vtx, CubeFaces);
+        intersect_array = [for (i = [0, len(counter)-2]) if (intersect_bars(counter[i], bar_vtx)) 1];
+        must_jump = (len(intersect_array) > 0);
+        echo("ARRAY:", intersect_array, "Jump?:", must_jump);
         mt1 = matrix_translate1(length, height, must_jump);
         mt2 = matrix_translate2(height);
         mr = matrix_rotate(angle);
         mm = mt1*mr; //possibly the opposite
         mtx = mtx*mm;
         counter = concat(counter, [bar_vtx]);
-        echo("Counter length:", len(counter));
-        echo("Counter:", counter);
-        echo(length, angle);
-        echo(mtx);
         translate([-height/2, -height/2, 0])
             color("blue", 0.5)
                 cube([length, height, height]);
-                translate([length-height,0,height])
+                translate([length-height,0,must_jump ? height:0])
                     rotate([0,0,angle])
                         if (n>1) step1(max_length, height, mtx, n-1, counter);
     };
@@ -89,5 +85,5 @@ module step1(max_length=10, height=1, mtx, n=5, counter)
 
 
 
-step1(20,2,matrix_identity(), 3, counter);    
+step1(20,2,matrix_identity(), 10, counter);    
     
