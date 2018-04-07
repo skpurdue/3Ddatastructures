@@ -8,10 +8,10 @@ function matrix_identity() =
       [0, 0, 1, 0],
       [0, 0, 0, 1] ];
 
-function matrix_translate1(length, height) =
+function matrix_translate1(length, height, must_jump) =
     [ [1, 0, 0, length-height],
       [0, 1, 0, 0],
-      [0, 0, 1, height], //to make translate when intersecting
+      [0, 0, 1, must_jump ? height:0],
       [0, 0, 0,  1] ];
 
 function matrix_translate2(height) =
@@ -65,9 +65,10 @@ module step1(max_length=10, height=1, mtx, n=5, counter)
         angle = gen_angle();
         mtxr = [ for (i = [ 0 : 2 ]) [ for (j = [ 0 : 3 ]) mtx[i][j] ] ];
         bar_vtx = bar_vertices(length,height,mtxr);
-        color("red", 1)
-            if (n>1) polyhedron(bar_vtx, CubeFaces);
-        mt1 = matrix_translate1(length, height);
+        must_jump = (len([for (i = [0, len(counter)-2]) if (intersect_bars(counter[i], bar_vtx)) 1]) > 0);
+        //color("red", 1)
+        //    if (n>1) polyhedron(bar_vtx, CubeFaces);
+        mt1 = matrix_translate1(length, height, must_jump);
         mt2 = matrix_translate2(height);
         mr = matrix_rotate(angle);
         mm = mt1*mr; //possibly the opposite
